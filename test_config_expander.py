@@ -1,7 +1,7 @@
 from config_expander import ConfigExpander
 
 
-def test_base_config_is_not_expandable():
+def test_base_config_is_not_expanded():
 	base_config = {'a': 12}
 	results = ConfigExpander().run_on_each_config(base_config, lambda config: config)
 	assert results == [base_config]
