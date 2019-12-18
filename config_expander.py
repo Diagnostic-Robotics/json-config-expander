@@ -1,10 +1,14 @@
 class ConfigExpander:
+
+	def __init__(self, expand_char='*'):
+		self.expand_char = expand_char
+
 	def expand_configs(self, base_config):
 		if type(base_config) != dict:
 			return [base_config]
 
 		config_keys = list(base_config.keys())
-		multi_val_keys = list(filter(lambda key: '*' in key, config_keys))
+		multi_val_keys = list(filter(lambda key: self.expand_char in key, config_keys))
 		if len(multi_val_keys) == 0:
 			return [base_config]
 
@@ -15,7 +19,7 @@ class ConfigExpander:
 		if type(values) != list:
 			values = [values]
 
-		single_val_key = multi_val_key.replace('*', '')
+		single_val_key = multi_val_key.replace(self.expand_char, '')
 		for val in values:
 			new_config = base_config.copy()
 			sub_expanded_configs = self.expand_configs(val)
@@ -37,4 +41,3 @@ class ConfigExpander:
 			results.append(result)
 
 		return results
-
