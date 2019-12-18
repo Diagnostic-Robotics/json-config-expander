@@ -1,23 +1,23 @@
 class ConfigExpander:
-	def expand_configs(self, config):
-		if type(config) != dict:
-			return [config]
+	def expand_configs(self, base_config):
+		if type(base_config) != dict:
+			return [base_config]
 
-		config_keys = list(config.keys())
+		config_keys = list(base_config.keys())
 		multi_val_keys = list(filter(lambda key: '*' in key, config_keys))
 		if len(multi_val_keys) == 0:
-			return [config]
+			return [base_config]
 
 		expanded_configs = []
 		multi_val_key = multi_val_keys[0]
 
-		values = config[multi_val_key]
+		values = base_config[multi_val_key]
 		if type(values) != list:
 			values = [values]
 
 		single_val_key = multi_val_key.replace('*', '')
 		for val in values:
-			new_config = config.copy()
+			new_config = base_config.copy()
 			sub_expanded_configs = self.expand_configs(val)
 			if len(sub_expanded_configs) == 1:
 				new_config[single_val_key] = sub_expanded_configs[0]
@@ -28,3 +28,13 @@ class ConfigExpander:
 			expanded_configs.extend(self.expand_configs(new_config))
 
 		return expanded_configs
+
+	def run_on_each_config(self, base_config, function):
+		expanded_configs = self.expand_configs(base_config)
+		results = []
+		for config in expanded_configs:
+			result = function(config)
+			results.append(result)
+
+		return results
+
