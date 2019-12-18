@@ -35,3 +35,9 @@ def test_running_function_on_each_config():
 	base_config = {'a*': [12, 13]}
 	results = ConfigExpander().run_on_each_config(base_config, lambda config: config['a'])
 	assert results == [12, 13]
+
+
+def test_expand_char_usage():
+	base_config = {'a#': [12, 13]}
+	results = ConfigExpander('#').run_on_each_config(base_config, lambda config: config)
+	assert results == [{'a': 12}, {'a': 13}]
