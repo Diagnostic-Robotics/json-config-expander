@@ -14,7 +14,7 @@ def test_base_config_is_expanded_in_one_level():
 
 
 def test_base_config_is_expanded_in_two_levels():
-	base_config = {'a*': {'b*': [12, 13]}}
+	base_config = {'a': {'b*': [12, 13]}}
 	results = ConfigExpander().run_on_each_config(base_config, lambda config: config)
 	assert results == [{'a': {'b': 12}}, {'a': {'b': 13}}]
 
@@ -41,3 +41,34 @@ def test_expand_char_usage():
 	base_config = {'a#': [12, 13]}
 	results = ConfigExpander('#').run_on_each_config(base_config, lambda config: config)
 	assert results == [{'a': 12}, {'a': 13}]
+
+
+def test_using_the_expand_char_only_in_lower_level_with_many_levels():
+	base_config = {'a': {'b': [{'c': {'d': {'e*': [10, 11]}}}, {'f': 50}]}}
+	results = ConfigExpander().run_on_each_config(base_config, lambda config: config)
+	assert results == [{'a': {'b': [{'c': {'d': {'e': 10}}}, {'f': 50}]}},
+		{'a': {'b': [{'c': {'d': {'e': 11}}}, {'f': 50}]}}]
+
+
+def test_diffrent_configs_dont_have_same_reference_in_not_expanded_keys():
+	base_config = {'a': {'b': 12}, 'c*': [1, 2]}
+
+	def change_values(config):
+		if config['c'] == 1:
+			config['a']['b'] = 2
+		return config
+
+	results = ConfigExpander().run_on_each_config(base_config, change_values)
+	assert results == [{'a': {'b': 2}, 'c': 1}, {'a': {'b': 12}, 'c': 2}]
+
+
+def test_diffrent_configs_dont_have_same_reference_in_expanded_keys():
+	base_config = {'a': {'b*': [12, 13]}}
+
+	def change_values(config):
+		if config['a']['b'] == 12:
+			config['a']['b'] = 2
+		return config
+
+	results = ConfigExpander().run_on_each_config(base_config, change_values)
+	assert results == [{'a': {'b': 2}}, {'a': {'b': 13}}]
