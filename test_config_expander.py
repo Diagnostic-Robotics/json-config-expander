@@ -15,11 +15,21 @@ def test_base_config_is_expanded_in_one_level():
 	assert results == [{'a': 12}, {'a': 13}]
 
 
+def test_base_config_is_expanded_in_one_level_three_items():
+	base_config = {'a*': [12], 'b*': [13], 'c*': [14]}
+	results = ConfigExpander().run_on_each_config(base_config, lambda config: config)
+	assert results == [{'a': 12, 'b': 13, 'c': 14}]
+
+
 def test_base_config_is_expanded_in_two_levels():
 	base_config = {'a': {'b*': [12, 13]}}
 	results = ConfigExpander().run_on_each_config(base_config, lambda config: config)
 	assert results == [{'a': {'b': 12}}, {'a': {'b': 13}}]
 
+def test_base_config_child_expanded_in_list():
+	base_config = {"a": [{'b*': [3, 4]}]}
+	results = ConfigExpander().run_on_each_config(base_config, lambda config: config)
+	assert results == [{'a': [{'b': 3}]}, {'a': [{'b': 4}]}]
 
 def test_base_config_is_expanded_twice_in_first_level():
 	base_config = {'a*': [12, 13], 'b*': [14, 15]}
@@ -55,7 +65,13 @@ def test_using_the_expand_char_only_in_lower_level_with_many_levels():
 	base_config = {'a': {'b': [{'c': {'d': {'e*': [10, 11]}}}, {'f': 50}]}}
 	results = ConfigExpander().run_on_each_config(base_config, lambda config: config)
 	assert results == [{'a': {'b': [{'c': {'d': {'e': 10}}}, {'f': 50}]}},
-		{'a': {'b': [{'c': {'d': {'e': 11}}}, {'f': 50}]}}]
+										 {'a': {'b': [{'c': {'d': {'e': 11}}}, {'f': 50}]}}]
+
+
+def test_base_config_is_expanded_list_in_list():
+	base_config = {"a*": [{'b*': [3, 4]}, {'c*': [5, 6]}]}
+	results = ConfigExpander().run_on_each_config(base_config, lambda config: config)
+	assert results == [{'a': {'b': 3}}, {'a': {'b': 4}}, {'a': {'c': 5}}, {'a': {'c': 6}}]
 
 
 def test_different_configs_dont_have_same_reference_in_not_expanded_keys():

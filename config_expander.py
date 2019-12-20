@@ -1,72 +1,43 @@
-import copy
+from copy import deepcopy, copy
+from itertools import product, chain
+
+
+def seq_iter(obj):
+	# iterate dict and list in same way
+	return obj if isinstance(obj, dict) else range(len(obj))
 
 
 class ConfigExpander:
-
 	def __init__(self, expand_char='*'):
 		self.expand_char = expand_char
-		self.type_handle_mapping = {dict: self._handle_dict, list: self._handle_list}
 
 	def run_on_each_config(self, base_config, function):
 		expanded_configs = self.expand_configs(base_config)
-		results = [function(config) for config in expanded_configs]
-
-		return results
+		return [function(deepcopy(config)) for config in expanded_configs]
 
 	def expand_configs(self, base_config):
-		path = self._find_first_expand_char_path(base_config)
-		if path is None:
+		if not isinstance(base_config, dict) and not isinstance(base_config, list):
 			return [base_config]
+		expanded_config = self._expand_config_children(base_config)
+		return self._create_cartesian_product_from_children(expanded_config)
 
-		path_value = self._get_path_value(base_config, path)
+	def _expand_config_children(self, config):
+		expanded_config = copy(config)
+		for key in seq_iter(expanded_config):
+			item = expanded_config[key]
+			if isinstance(key, str) and self.expand_char in key:
+				if not isinstance(item, list): raise TypeError("You can apply expand only on list")
+				# expand each child of item and flatten result to single list
+				expanded_config[key] = chain.from_iterable(self.expand_configs(x) for x in item)
+			else:
+				expanded_config[key] = self.expand_configs(item)
+		return expanded_config
 
-		expanded_configs = []
-		for value in path_value:
-			new_value = copy.deepcopy(value)
-			new_config = copy.deepcopy(base_config)
-			self._update_value_in_path(new_config, new_value, path)
-			expanded_configs.extend(self.expand_configs(new_config))
+	def _create_cartesian_product_from_children(self, expanded_config):
+		if isinstance(expanded_config, list):
+			# convert result to list, since product returns tuple
+			return [list(x) for x in product(*expanded_config)]
 
-		return expanded_configs
-
-	def _find_first_expand_char_path(self, base_config):
-		base_config_type = type(base_config)
-		if base_config_type in self.type_handle_mapping:
-			return self.type_handle_mapping[base_config_type](base_config)
-
-		return None
-
-	def _handle_list(self, config_list):
-		for index in range(len(config_list)):
-			path = self._find_first_expand_char_path(config_list[index])
-			if path is not None:
-				return [index] + path
-		return None
-
-	def _handle_dict(self, config_dict):
-		for key in config_dict:
-			if self.expand_char in key:
-				return [key]
-
-			path = self._find_first_expand_char_path(config_dict[key])
-			if path is not None:
-				return [key] + path
-		return None
-
-	def _update_value_in_path(self, new_config, new_value, path):
-		path_value = new_config
-		for key_index in range(len(path) - 1):
-			key = path[key_index]
-			path_value = path_value[key]
-		last_key = path[-1]  # The last key must be a string
-		key_without_expand_char = last_key.replace(self.expand_char, '')
-		path_value[key_without_expand_char] = new_value
-		path_value.pop(last_key)
-
-	def _get_path_value(self, base_config, path):
-		path_value = base_config
-		for key in path:
-			path_value = path_value[key]
-		if type(path_value) is not list:
-			raise TypeError(f'the value of {path} should be a list! ({path_value} is not a list)')
-		return path_value
+		# create dict from config keys and product config values
+		keys = [k.replace(self.expand_char, '') for k in expanded_config.keys()]
+		return list(dict(zip(keys, x)) for x in product(*expanded_config.values()))
