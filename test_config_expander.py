@@ -109,5 +109,5 @@ def test_the_base_config_is_immutable_deeply():
 def test_illegal_expanded_key_should_throw_exception():
 	base_config = {'a*': 12}
 
-	with pytest.raises(Exception):
+	with pytest.raises(TypeError):
 		assert ConfigExpander().run_on_each_config(base_config, lambda config: config)

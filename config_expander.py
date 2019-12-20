@@ -68,5 +68,5 @@ class ConfigExpander:
 		for key in path:
 			path_value = path_value[key]
 		if type(path_value) is not list:
-			raise Exception(f'the value of {path} should be a list! ({path_value} is not a list)')
+			raise TypeError(f'the value of {path} should be a list! ({path_value} is not a list)')
 		return path_value
