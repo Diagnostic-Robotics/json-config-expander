@@ -1,6 +1,6 @@
 import pytest
 
-from config_expander import ConfigExpander
+from json_config_expander.config_expander import ConfigExpander
 
 
 def test_base_config_is_not_expanded():
