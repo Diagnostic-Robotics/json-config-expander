@@ -1,5 +1,4 @@
 import pytest
-
 from config_expander import ConfigExpander
 
 
@@ -19,6 +18,12 @@ def test_base_config_is_expanded_in_two_levels():
 	base_config = {'a': {'b*': [12, 13]}}
 	results = ConfigExpander().run_on_each_config(base_config, lambda config: config)
 	assert results == [{'a': {'b': 12}}, {'a': {'b': 13}}]
+
+
+def test_base_config_is_expanded_in_three_levels():
+	base_config = {'a': {'b': {'c*': [12, 13]}}}
+	results = ConfigExpander().run_on_each_config(base_config, lambda config: config)
+	assert results == [{'a': {'b': {'c': 12}}}, {'a': {'b': {'c': 13}}}]
 
 
 def test_base_config_is_expanded_twice_in_first_level():
@@ -111,3 +116,10 @@ def test_illegal_expanded_key_should_throw_exception():
 
 	with pytest.raises(TypeError):
 		assert ConfigExpander().run_on_each_config(base_config, lambda config: config)
+
+
+def test_expand_inside_a_not_expanded_list():
+	base_config = {'a': [{'b*': [1, 2]}, 10]}
+
+	results = ConfigExpander().run_on_each_config(base_config, lambda config: config)
+	assert results == [{'a': [{'b': 1}, 10]}, {'a': [{'b': 2}, 10]}]
