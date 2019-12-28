@@ -1,5 +1,5 @@
 import pytest
-from config_expander import expand_configs, ImplementationTypes
+from json_config_expander.config_expander import expand_configs, ImplementationTypes
 
 
 def test_base_config_is_not_expanded():
