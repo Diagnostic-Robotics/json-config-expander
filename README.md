@@ -5,7 +5,7 @@ Expand **multi optional** configuration to **multiple configurations**.
 ### Example 1
 ```
 base_config = {'param_1*': [12, 13]}
-ConfigExpander().expand_configs(base_config)
+expand_configs(base_config)
 ```
 Returns:
 ```
@@ -15,7 +15,7 @@ Returns:
 ### Example 2
 ```
 base_config = {'param_1': {'param_2*': [12, 13]}}
-ConfigExpander().expand_configs(base_config)
+expand_configs(base_config)
 ```
 Returns:
 ```
@@ -28,7 +28,7 @@ Returns:
 ### Example 3
 ```
 base_config = {'param_1*': [12, 13], 'param_2*': ['a', 'b']}
-ConfigExpander().expand_configs(base_config)
+expand_configs(base_config)
 ```
 Returns:
 ```
@@ -48,7 +48,7 @@ base_config = {
         {'param_3*': ['Big', 'Small']}
     ]
 }
-ConfigExpander().expand_configs(base_config)
+expand_configs(base_config)
 ```
 Returns:
 ```
@@ -76,7 +76,7 @@ base_config = {
 
 To returns all the possible configurations of your setting:
 ```
-ConfigExpander().expand_configs(base_config)
+expand_configs(base_config)
 ```
 Returns:
 ```
@@ -103,7 +103,7 @@ def evaluation_function(config):
 ```
 
 ```
-results = ConfigExpander().run_on_each_config(base_config, evaluation_function)
+results = expand_configs(base_config, evaluation_function)
 ```
 
 The results list would have all the evaluation results on each config, then you can select the best result for your needs.
