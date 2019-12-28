@@ -58,7 +58,7 @@ def test_expand_char_usage():
 
 def test_using_the_expand_char_only_in_lower_level_with_many_levels():
 	base_config = {'a': {'b': [{'c': {'d': {'e*': [10, 11]}}}, {'f': 50}]}}
-	results = expand_configs(base_config, lambda config: config)
+	results = expand_configs(base_config)
 	assert results == [{'a': {'b': [{'c': {'d': {'e': 10}}}, {'f': 50}]}},
 		{'a': {'b': [{'c': {'d': {'e': 11}}}, {'f': 50}]}}]
 
